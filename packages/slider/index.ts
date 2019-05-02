@@ -32,7 +32,7 @@ VantComponent({
   },
 
   watch: {
-    value(value) {
+    value(value: number) {
       this.updateValue(value, false);
     }
   },
@@ -53,27 +53,28 @@ VantComponent({
       if (this.data.disabled) return;
 
       this.touchMove(event);
-      this.getRect('.van-slider').then(rect => {
+      this.getRect('.van-slider').then((rect: wx.BoundingClientRectCallbackResult) => {
         const diff = this.deltaX / rect.width * 100;
-        this.updateValue(this.startValue + diff, false, true);
+        this.newValue = this.startValue + diff;
+        this.updateValue(this.newValue, false, true);
       });
     },
 
     onTouchEnd() {
       if (this.data.disabled) return;
-      this.updateValue(this.data.value, true);
+      this.updateValue(this.newValue, true);
     },
 
     onClick(event: Weapp.TouchEvent) {
       if (this.data.disabled) return;
 
-      this.getRect(rect => {
+      this.getRect('.van-slider').then((rect: wx.BoundingClientRectCallbackResult) => {
         const value = (event.detail.x - rect.left) / rect.width * 100;
         this.updateValue(value, true);
       });
     },
 
-    updateValue(value, end, drag) {
+    updateValue(value: number, end: boolean, drag: boolean) {
       value = this.format(value);
 
       this.set({
@@ -84,13 +85,13 @@ VantComponent({
       if (drag) {
         this.$emit('drag', { value });
       }
-      
+
       if (end) {
         this.$emit('change', value);
       }
     },
 
-    format(value) {
+    format(value: number) {
       const { max, min, step } = this.data;
       return Math.round(Math.max(min, Math.min(value, max)) / step) * step;
     }
